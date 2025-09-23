@@ -1,0 +1,8 @@
+https://tailwindcss.com/docs/installation/using-vite
+
+https://tailwindcss.com/docs/installation/using-vite
+
+
+✦ sidebar.tsx's Sidebar and SidebarInset components are likely causing a layout issue. SidebarInset's ml-2 margin for the collapsed, inset state doesn't
+  account for the p-2 padding on the Sidebar component. This padding creates a visual gap. I need to find where SidebarInset is used and adjust the
+  layout to compensate for the sidebar's padding. I'll start by searching for SidebarInset's usage.
