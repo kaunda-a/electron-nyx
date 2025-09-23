@@ -43,9 +43,7 @@ function createWindow(): void {
 // Start the Express server
 function startServer(): void {
   // In development, use src/server, in production use out/server
-  const serverPath = is.dev 
-    ? join(__dirname, '../src/server/start.js') 
-    : join(__dirname, '../server/start.js')
+  const serverPath = join(__dirname, '../server/start.js')
     
   serverProcess = spawn('node', [serverPath], {
     env: { ...process.env, NODE_ENV: is.dev ? 'development' : 'production' }

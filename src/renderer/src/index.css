@@ -28,38 +28,36 @@
   }
 
   .dark {
-    /* Dark theme colors (your beautiful gradient) */
-    --background: 230 41% 9%;
-    --background-gradient-from: 256 56% 14%;
-    --background-gradient-to: 232 51% 7%;
-    --foreground: 213 31% 91%;
-    
-    --card: 232 47% 12%;
-    --card-foreground: 213 31% 91%;
-    --popover: 232 47% 12%;
-    --popover-foreground: 215 20.2% 65.1%;
-    --primary: 252 100% 82%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 232 47% 15%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 232 47% 15%;
-    --muted-foreground: 215.4 16.3% 56.9%;
-    --accent: 252 87% 24%;
-    --accent-foreground: 210 40% 98%;
+    --background: 158 96% 10%;
+    --background-gradient-from: 158 96% 8%;
+    --background-gradient-to: 158 96% 12%;
+    --foreground: 228 25% 94%;
+
+    --card: 158 96% 13%;
+    --card-foreground: 228 25% 94%;
+    --popover: 158 96% 13%;
+    --popover-foreground: 228 25% 94%;
+    --primary: 158 96% 20%;
+    --primary-foreground: 210 6% 28%;
+    --secondary: 158 96% 13%;
+    --secondary-foreground: 228 25% 94%;
+    --muted: 158 96% 13%;
+    --muted-foreground: 210 6% 28%;
+    --accent: 158 96% 28%;
+    --accent-foreground: 228 25% 94%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
-    --border: 232 47% 15%;
-    --input: 232 47% 15%;
-    --ring: 252 100% 82%;
-    --glow-primary: 252 100% 82%;
-    --border-gradient-from: 256 56% 14%;
-    --border-gradient-to: 232 51% 7%;
+    --border: 210 6% 28%;
+    --input: 158 96% 13%;
+    --ring: 158 96% 20%;
+    --glow-primary: 158 96% 20%;
+    --border-gradient-from: 158 96% 8%;
+    --border-gradient-to: 158 96% 12%;
 
-      /* Default RGB values for primary color - will be overridden by JS */
-  --primary-rgb: 99, 102, 241; /* Default indigo color */
-  --success-rgb: 34, 197, 94; /* Default green color */
-  --warning-rgb: 234, 179, 8; /* Default yellow color */
-  --destructive-rgb: 239, 68, 68; /* Default red color */
+    --primary-rgb: 2, 100, 64;
+    --success-rgb: 34, 197, 94;
+    --warning-rgb: 234, 179, 8;
+    --destructive-rgb: 239, 68, 68;
   }
 
   body {

@@ -5,10 +5,7 @@ const path = require('path');
 function findBrowserExecutable() {
   // Check for extracted browser directory
   const possiblePaths = [
-    './chrome.exe',  // Browser extracted to root
-    './browser/chrome.exe',  // Browser in browser directory
-    '../browser/chrome.exe',  // Relative path from server directory
-    './131.0.6778.204/chrome.exe'  // Version-specific directory
+    './resources/browser/chrome.exe',  // Browser in resources/browser directory
   ];
 
   for (const browserPath of possiblePaths) {
@@ -19,7 +16,7 @@ function findBrowserExecutable() {
 
   // Always return the expected path even if file doesn't exist yet
   // This ensures we never fall back to default Chromium
-  return path.resolve('./chrome.exe');
+  return path.resolve('./resources/browser/chrome.exe');
 }
 
 // Export the function
