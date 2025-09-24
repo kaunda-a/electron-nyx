@@ -1,7 +1,8 @@
-appId: com.electron.app
-productName: electron-nyx
+appId: com.nyx.app
+productName: nyx
 directories:
   buildResources: build
+  output: dist
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -12,7 +13,9 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: electron-nyx
+  target:
+    - nsis
+  executableName: nyx
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
