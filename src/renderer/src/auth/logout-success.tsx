@@ -47,7 +47,7 @@ export default function LogoutSuccess() {
   // Auto-navigate after 5 seconds
   useEffect(() => {
     const timeout = setTimeout(() => {
-      navigate({ to: '/home' })
+      navigate({ to: '/sign-in' })
     }, 5000)
 
     return () => clearTimeout(timeout)
@@ -161,7 +161,7 @@ export default function LogoutSuccess() {
             transition={{ delay: 0.7 }}
             className="text-sm text-muted-foreground"
           >
-            You'll be automatically redirected to the home page in 5 seconds
+            You'll be automatically redirected to the sign-in page in 5 seconds
           </motion.p>
         </div>
 

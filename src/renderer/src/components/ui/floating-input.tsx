@@ -1,8 +1,7 @@
 import { cn } from "@/lib/utils"
-import { InputProps } from "./input"
 import { forwardRef, useState } from "react"
 
-interface FloatingInputProps extends InputProps {
+interface FloatingInputProps extends React.ComponentProps<'input'> {
   label: string
 }
 

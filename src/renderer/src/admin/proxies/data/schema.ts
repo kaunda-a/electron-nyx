@@ -16,8 +16,15 @@ export interface ProxyConfig {
     [key: string]: any
   }
   ip?: string
-  type?: string
+  type?: string | null
   provider?: string
+  rotation?: {
+    enabled: boolean
+    interval?: number
+    last_rotation?: string
+    next_rotation?: string
+  }
+  isAssigned?: boolean
 }
 
 export interface CreateProxy {

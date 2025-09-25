@@ -2,7 +2,6 @@ import { resolve } from 'path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react-swc'
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
-import { builtinModules } from 'module'
 import copy from 'rollup-plugin-copy'
 import tailwindcss from '@tailwindcss/vite'
 
@@ -13,8 +12,8 @@ export default defineConfig({
       copy({
         targets: [
           {
-            src: 'src/server/**/*',
-            dest: 'out/server'
+            src: 'src/server',
+            dest: 'out'
           },
           {
             src: 'resources/**/*',
@@ -42,7 +41,6 @@ export default defineConfig({
     server: {
       host: '0.0.0.0',
       port: 5173,
-      strictSSL: false,
       proxy: {
         '/api': {
           target: process.env.VITE_API_URL || 'http://localhost:3000',
@@ -61,12 +59,5 @@ export default defineConfig({
         port: 5173,
       },
     }
-  },
-  build: {
-    rollupOptions: {
-      external: [...builtinModules, 'electron']
-    },
-    sourcemap: true,
-    minify: 'esbuild'
   }
 })

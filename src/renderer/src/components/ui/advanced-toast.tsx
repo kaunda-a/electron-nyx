@@ -2,7 +2,7 @@ import { Toast, ToastProps } from "./toast"
 import { cn } from "@/lib/utils"
 import { IconCheck, IconX, IconInfoCircle, IconAlertTriangle } from "@tabler/icons-react"
 
-interface AdvancedToastProps extends ToastProps {
+interface AdvancedToastProps extends Omit<ToastProps, 'variant'> {
   variant?: "success" | "error" | "info" | "warning"
 }
 
@@ -32,6 +32,9 @@ export function AdvancedToast({
 }: AdvancedToastProps) {
   const Icon = variants[variant].icon
 
+  // Extract the variant prop to avoid passing it to the base Toast
+  const { variant: toastVariant, ...filteredProps } = props;
+
   return (
     <Toast
       className={cn(
@@ -39,7 +42,7 @@ export function AdvancedToast({
         variants[variant].className,
         className
       )}
-      {...props}
+      {...filteredProps}
     >
       <div className="flex items-center gap-2">
         <Icon className="h-4 w-4" />

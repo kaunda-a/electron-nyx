@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,7 +25,6 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
 import {
   Form,
   FormControl,
@@ -42,20 +41,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  LayoutGrid,
-  LayoutList,
-  Search,
-  Filter,
-  RefreshCw,
-  Plus,
-  BarChart,
+import { 
   Play,
-  Pause,
   Square,
   Calendar,
   Target,
-  DollarSign,
   TrendingUp,
   AlertCircle,
   X,
@@ -65,7 +55,13 @@ import {
   Download,
   Loader2,
   Settings,
-  Users
+  Users,
+  Plus,
+  BarChart,
+  Search,
+  LayoutGrid,
+  LayoutList,
+  RefreshCw
 } from 'lucide-react';
 import { useCampaigns } from '../../context/campaigns-context';
 import { Campaign } from '../../data/schema';
@@ -388,16 +384,18 @@ export function CampaignsDashboard() {
   };
 
   // Helper functions for managing array items in the form
-  const addArrayItem = (parent: string, field: string, defaultValue: string = '') => {
-    const currentValues = form.getValues(parent)[field] || [];
-    form.setValue(`${parent}.${field}`, [...currentValues, defaultValue]);
+  const addArrayItem = (parent: keyof Campaign, field: string, defaultValue: string = '') => {
+    const parentValue = form.getValues(parent);
+    const currentValues = parentValue && typeof parentValue === 'object' ? (parentValue as any)[field] || [] : [];
+    form.setValue(`${parent}.${field}` as any, [...currentValues, defaultValue]);
   };
 
-  const removeArrayItem = (parent: string, field: string, index: number) => {
-    const currentValues = form.getValues(parent)[field] || [];
+  const removeArrayItem = (parent: keyof Campaign, field: string, index: number) => {
+    const parentValue = form.getValues(parent);
+    const currentValues = parentValue && typeof parentValue === 'object' ? (parentValue as any)[field] || [] : [];
     const newValues = [...currentValues];
     newValues.splice(index, 1);
-    form.setValue(`${parent}.${field}`, newValues);
+    form.setValue(`${parent}.${field}` as any, newValues);
   };
 
   // Format percentage

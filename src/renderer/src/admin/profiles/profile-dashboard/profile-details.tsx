@@ -41,10 +41,7 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
 import { Profile } from '../api';
 import { useProfiles } from '../context/profile-context';
 import { formatDistanceToNow, format } from 'date-fns';
-import { GlassCard } from '../components/ui/glass-card';
-import { GradientBorder } from '../components/ui/gradient-border';
-import { NeonText } from '../components/ui/neon-text';
-import { MorphismCard } from '../components/ui/morphism-card';
+
 import { ProxySelectionModal } from '../components/proxy-selection-modal';
 import { ProfileEditModal } from '../components/profile-edit-modal';
 
@@ -251,29 +248,16 @@ export const ProfileDetails: React.FC<ProfileDetailsProps> = ({ profile }) => {
 
   return (
     <>
-      <MorphismCard
-        ref={cardRef}
-        variant="glass"
-        interactive={true}
-        depth="medium"
-        className="overflow-hidden relative h-[400px] flex flex-col"
-      >
-
-        <CardHeader className="relative">
-        <div className="flex justify-between items-start">
-          <div>
-            <NeonText
-              variant="purple"
-              intensity="medium"
-              as="h3"
-              className="text-xl font-bold"
-            >
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">
               {profile.name}
-            </NeonText>
-            <CardDescription>
-              Created {formatDate(profile.created_at)}
-            </CardDescription>
-          </div>
+            </span>
+          </CardTitle>
+          <CardDescription>
+            Created {formatDate(profile.created_at)}
+          </CardDescription>
           <div className="flex space-x-1">
             {isActive && (
               <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0 shadow-sm animate-pulse">
@@ -288,22 +272,15 @@ export const ProfileDetails: React.FC<ProfileDetailsProps> = ({ profile }) => {
               </Badge>
             )}
           </div>
-        </div>
-      </CardHeader>
+        </CardHeader>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-        <GradientBorder
-          variant="default"
-          animate={true}
-          intensity="low"
-          borderWidth="thin"
-          className="mx-6"
-        >
+        <div className="mx-6 rounded-lg border border-gradient-to-r from-gray-700 to-gray-800">
           <TabsList className="grid grid-cols-3 bg-black/20 border-0">
             <TabsTrigger value="overview" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
               <Monitor className="mr-2 h-4 w-4" />
               {activeTab === 'overview' ? (
-                <NeonText variant="blue" intensity="low">Overview</NeonText>
+                <span className="text-blue-500">Overview</span>
               ) : (
                 'Overview'
               )}
@@ -325,7 +302,7 @@ export const ProfileDetails: React.FC<ProfileDetailsProps> = ({ profile }) => {
               )}
             </TabsTrigger>
           </TabsList>
-        </GradientBorder>
+        </div>
 
         <CardContent className="pt-6 flex-1 overflow-auto">
           <TabsContent value="overview" className="space-y-4 h-full">
@@ -482,23 +459,19 @@ export const ProfileDetails: React.FC<ProfileDetailsProps> = ({ profile }) => {
                 <p className="text-sm text-muted-foreground max-w-[250px]">
                   Launch the browser to view the actual fingerprint data
                 </p>
-                <GlassCard
-                  variant="dark"
-                  intensity="medium"
-                  hoverEffect={true}
-                  borderGlow={true}
-                  className="mt-4 overflow-hidden"
-                >
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleLaunch(true)}
-                    className="bg-transparent border-0 relative overflow-hidden group"
-                  >
-                    <Play className="mr-2 h-4 w-4 text-blue-400" />
-                    <NeonText variant="blue" intensity="medium">Launch Browser</NeonText>
-                    <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-blue-500/20 to-transparent -translate-x-full group-hover:animate-pulse" />
-                  </Button>
-                </GlassCard>
+                <Card className="mt-4 overflow-hidden bg-transparent border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
+                  <CardContent className="p-4">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleLaunch(true)}
+                      className="bg-transparent border-0 relative overflow-hidden group w-full"
+                    >
+                      <Play className="mr-2 h-4 w-4 text-blue-400" />
+                      <span className="text-blue-500">Launch Browser</span>
+                      <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-blue-500/20 to-transparent -translate-x-full group-hover:animate-pulse" />
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
             ) : (
               <>
@@ -648,11 +621,7 @@ export const ProfileDetails: React.FC<ProfileDetailsProps> = ({ profile }) => {
       </Tabs>
 
       <CardFooter className="flex justify-between border-t border-border/40 bg-black/30 backdrop-blur-sm">
-        <GlassCard
-          variant="dark"
-          intensity="low"
-          className="p-2 flex justify-between w-full"
-        >
+        <Card className="bg-transparent border border-gray-700/50 p-2 flex justify-between w-full">
           {isActive ? (
             <Button
               variant="outline"
@@ -668,20 +637,14 @@ export const ProfileDetails: React.FC<ProfileDetailsProps> = ({ profile }) => {
               ) : (
                 <>
                   <Square className="mr-2 h-4 w-4" />
-                  <NeonText variant="red" intensity="low">Stop Browser</NeonText>
+                  <span className="text-red-500">Stop Browser</span>
                   <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-red-500/10 to-transparent -translate-x-full group-hover:animate-pulse" />
                 </>
               )}
             </Button>
           ) : (
             <div className="flex space-x-2">
-              <GradientBorder
-                variant="rainbow"
-                animate={true}
-                intensity="medium"
-                borderWidth="thin"
-                className="rounded-md"
-              >
+              <div className="rounded-md border border-gradient-to-r from-gray-700 to-gray-800">
                 <Button
                   onClick={() => handleLaunch(true)}
                   disabled={isLaunching}
@@ -695,12 +658,12 @@ export const ProfileDetails: React.FC<ProfileDetailsProps> = ({ profile }) => {
                   ) : (
                     <>
                       <Play className="mr-2 h-4 w-4" />
-                      <NeonText variant="blue" intensity="low">Launch with Proxy</NeonText>
+                      <span className="text-blue-500">Launch with Proxy</span>
                       <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-pulse" />
                     </>
                   )}
                 </Button>
-              </GradientBorder>
+              </div>
               <Button
                 variant="outline"
                 onClick={() => handleLaunch(false)}
@@ -735,9 +698,9 @@ export const ProfileDetails: React.FC<ProfileDetailsProps> = ({ profile }) => {
               <Trash className="h-4 w-4" />
             </Button>
           </div>
-        </GlassCard>
+        </Card>
       </CardFooter>
-    </MorphismCard>
+    </Card>
     <ProxySelectionModal 
       open={isProxyModalOpen}
       onOpenChange={setIsProxyModalOpen}

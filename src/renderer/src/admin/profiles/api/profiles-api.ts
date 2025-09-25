@@ -65,11 +65,13 @@ export interface ProfileConfigCreate {
 
 export interface ProfileCreate {
   name?: string;
+  description?: string;
   config?: ProfileConfigCreate;
 }
 
 export interface ProfileUpdate {
   name?: string;
+  description?: string;
   config?: ProfileConfigCreate;
   regenerate_fingerprint?: boolean;
 }
@@ -136,6 +138,7 @@ export interface FingerprintData {
 export interface Profile {
   id: string;
   name: string;
+  description?: string;
   created_at: string;
   updated_at?: string;
   fingerprint?: FingerprintData;
@@ -230,7 +233,7 @@ export const profilesApi = {
    */
   create: async (profileData: ProfileCreate): Promise<Profile> => {
     const response = await api.post('/api/profiles', profileData);
-    return response;
+    return response?.data;
   },
 
   /**
@@ -263,7 +266,7 @@ export const profilesApi = {
    */
   get: async (profileId: string): Promise<Profile> => {
     const response = await api.get(`/api/profiles/${profileId}`);
-    return response;
+    return response?.data;
   },
 
   /**
@@ -274,7 +277,7 @@ export const profilesApi = {
     updateData: ProfileUpdate
   ): Promise<Profile> => {
     const response = await api.put(`/api/profiles/${profileId}`, updateData);
-    return response;
+    return response?.data;
   },
 
   /**
@@ -296,7 +299,7 @@ export const profilesApi = {
    */
   getStats: async (profileId: string): Promise<ProfileStats> => {
     const response = await api.get(`/api/profiles/${profileId}/stats`);
-    return response;
+    return response?.data;
   },
 
   /**
@@ -312,7 +315,7 @@ export const profilesApi = {
    */
   createBatch: async (batchConfig: BatchProfileCreate): Promise<BatchProfileResponse> => {
     const response = await api.post('/api/profiles/batch', batchConfig);
-    return response;
+    return response?.data;
   },
 
   /**

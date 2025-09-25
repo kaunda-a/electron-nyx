@@ -18,6 +18,7 @@ export function useLoadingMutation<
       if (options.onMutate) {
         return await options.onMutate(variables)
       }
+      return undefined
     },
     onSettled: (data, error, variables, context) => {
       setIsLoading(false)

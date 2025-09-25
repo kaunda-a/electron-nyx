@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -18,21 +17,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Plus,
-  Upload,
-  RefreshCw,
-  Copy,
-  Layers,
-  Settings,
-  Check
-} from 'lucide-react';
-import { useProfiles } from '../context/profile-context';
-import { ProfileCreate, Profile, ProfileUpdate } from '../api';
-import { GradientBorder } from '../components/ui/gradient-border';
-import { NeonText } from '../components/ui/neon-text';
-import { GlassCard } from '../components/ui/glass-card';
+import { Plus, Upload, RefreshCw } from 'lucide-react';
 
 interface ProfileActionsProps {
   onRefresh: () => void;

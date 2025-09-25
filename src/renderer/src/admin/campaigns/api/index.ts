@@ -164,10 +164,20 @@ export interface CampaignLaunchProgress {
   };
 }
 
-// Local storage key for caching campaigns
-const CAMPAIGNS_STORAGE_KEY = 'nyx_campaigns_cache';
+
+
+// Define the storage key constant
+const CAMPAIGNS_STORAGE_KEY = 'nyx_campaigns';
 
 // Helper functions for local storage
+const clearCampaignsFromLocalStorage = () => {
+  try {
+    localStorage.removeItem(CAMPAIGNS_STORAGE_KEY);
+  } catch (error) {
+    console.warn('Failed to clear campaigns from localStorage:', error);
+  }
+};
+
 const saveCampaignsToLocalStorage = (campaigns: Campaign[]) => {
   try {
     localStorage.setItem(CAMPAIGNS_STORAGE_KEY, JSON.stringify(campaigns));
@@ -186,13 +196,7 @@ const loadCampaignsFromLocalStorage = (): Campaign[] => {
   }
 };
 
-const clearCampaignsFromLocalStorage = () => {
-  try {
-    localStorage.removeItem(CAMPAIGNS_STORAGE_KEY);
-  } catch (error) {
-    console.warn('Failed to clear campaigns from localStorage:', error);
-  }
-};
+
 
 /**
  * Campaigns API client for interacting with the server endpoints
@@ -231,7 +235,7 @@ export const campaignsApi = {
   get: async (campaignId: string): Promise<Campaign> => {
     try {
       const response = await api.get(`/api/campaigns/${campaignId}`);
-      return response || {};
+      return response?.data || {};
     } catch (error) {
       // Try to find in localStorage cache
       const cachedCampaigns = loadCampaignsFromLocalStorage();
@@ -251,7 +255,7 @@ export const campaignsApi = {
   create: async (campaignData: CampaignCreate): Promise<Campaign> => {
     try {
       const response = await api.post('/api/campaigns', campaignData);
-      const newCampaign = response || campaignData;
+      const newCampaign = response?.data || campaignData;
       
       // Update localStorage cache
       const cachedCampaigns = loadCampaignsFromLocalStorage();
@@ -273,7 +277,7 @@ export const campaignsApi = {
   ): Promise<Campaign> => {
     try {
       const response = await api.put(`/api/campaigns/${campaignId}`, updateData);
-      const updatedCampaign = response || updateData;
+      const updatedCampaign = response?.data || updateData;
       
       // Update localStorage cache
       const cachedCampaigns = loadCampaignsFromLocalStorage();
@@ -320,7 +324,7 @@ export const campaignsApi = {
   getStats: async (): Promise<CampaignStats> => {
     try {
       const response = await api.get('/api/campaigns/stats');
-      return response || {
+      return response?.data || {
         total: 0,
         active: 0,
         byStatus: {},
@@ -344,7 +348,7 @@ export const campaignsApi = {
   ): Promise<CampaignLaunchResponse> => {
     try {
       const response = await api.post(`/api/campaigns/${campaignId}/launch`, options);
-      return response;
+      return response?.data;
     } catch (error) {
       throw error;
     }
@@ -357,7 +361,7 @@ export const campaignsApi = {
   getProgress: async (campaignId: string): Promise<CampaignProgress> => {
     try {
       const response = await api.get(`/api/campaigns/${campaignId}/progress`);
-      return response || {
+      return response?.data || {
         campaignId,
         status: 'pending',
         progress: 0
@@ -370,6 +374,13 @@ export const campaignsApi = {
   /**
    * Clear local storage cache
    */
+  /**
+   * Clear local storage cache
+   */
+  clearCache: () => {
+    clearCampaignsFromLocalStorage();
+  },
+
   /**
    * Export campaigns to JSON
    * @param campaignIds - Optional array of campaign IDs to export

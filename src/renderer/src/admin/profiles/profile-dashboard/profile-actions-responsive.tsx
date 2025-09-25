@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -10,7 +10,6 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -26,13 +25,11 @@ import {
   Copy,
   Layers,
   Settings,
-  Check
+  Check,
+  Loader2
 } from 'lucide-react';
 import { useProfiles } from '../context/profile-context';
-import { ProfileCreate, Profile, ProfileUpdate } from '../api';
-import { GradientBorder } from '../components/ui/gradient-border';
-import { NeonText } from '../components/ui/neon-text';
-import { GlassCard } from '../components/ui/glass-card';
+import { ProfileCreate } from '../api';
 
 interface ProfileActionsResponsiveProps {
   onRefresh: () => void;
@@ -47,7 +44,7 @@ export function ProfileActionsResponsive({
   onCreate, 
   loading = false 
 }: ProfileActionsResponsiveProps) {
-  const { profiles } = useProfiles();
+  const { profiles, createProfile } = useProfiles();
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -65,6 +62,11 @@ export function ProfileActionsResponsive({
       countryCode: 'US',
     }
   });
+
+  // Helper function to construct the proxy server string
+  const constructProxyServer = (protocol: string, host: string, port: string | number) => {
+    return `${protocol}://${host}:${port}`;
+  };
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -163,7 +165,7 @@ export function ProfileActionsResponsive({
       };
       
       // Create the profile
-      await onCreateProfile(profileData);
+      await createProfile(profileData);
       
       // Reset form
       setNewProfile({

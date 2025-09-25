@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,7 +6,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { 
   Select, 
   SelectContent, 
@@ -14,7 +13,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+
 import { Badge } from '@/components/ui/badge';
 import { 
   Card, 
@@ -31,12 +30,6 @@ import {
   TabsTrigger 
 } from '@/components/ui/tabs';
 import { 
-  Accordion, 
-  AccordionContent, 
-  AccordionItem, 
-  AccordionTrigger 
-} from '@/components/ui/accordion';
-import { 
   Form,
   FormControl,
   FormField,
@@ -48,21 +41,15 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
-  DialogDescription
+  DialogTitle
 } from '@/components/ui/dialog';
 import { 
   Calendar, 
-  Clock, 
-  Globe, 
   Target, 
   Settings, 
   Users, 
   BarChart3, 
   Play, 
-  Pause, 
-  Square,
-  Copy,
   Trash2,
   Save,
   X,
@@ -270,16 +257,18 @@ export function CampaignDetail({ campaign, onClose, onLaunch }: CampaignDetailPr
   }, [campaign.id, getCampaignProfiles, validateCampaignProfiles, toast]);
 
   // Helper functions for managing array items in the form
-  const addArrayItem = (parent: string, field: string, defaultValue: string = '') => {
-    const currentValues = form.getValues(parent)[field] || [];
-    form.setValue(`${parent}.${field}`, [...currentValues, defaultValue]);
+  const addArrayItem = (parent: keyof Campaign, field: string, defaultValue: string = '') => {
+    const parentValue = form.getValues(parent);
+    const currentValues = parentValue && typeof parentValue === 'object' ? (parentValue as any)[field] || [] : [];
+    form.setValue(`${parent}.${field}` as any, [...currentValues, defaultValue]);
   };
 
-  const removeArrayItem = (parent: string, field: string, index: number) => {
-    const currentValues = form.getValues(parent)[field] || [];
+  const removeArrayItem = (parent: keyof Campaign, field: string, index: number) => {
+    const parentValue = form.getValues(parent);
+    const currentValues = parentValue && typeof parentValue === 'object' ? (parentValue as any)[field] || [] : [];
     const newValues = [...currentValues];
     newValues.splice(index, 1);
-    form.setValue(`${parent}.${field}`, newValues);
+    form.setValue(`${parent}.${field}` as any, newValues);
   };
 
   // Handle campaign save

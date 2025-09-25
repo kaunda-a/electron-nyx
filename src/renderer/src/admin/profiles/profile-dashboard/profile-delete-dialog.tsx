@@ -1,30 +1,30 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { useNumbers } from '../../context/numbers-context'
-import { numbersApi } from '../../api/numbers-api'
+import { useProfiles } from '../../context/profile-context'
+import { profilesApi } from '../../api/profiles-api'
 import { useToast } from '@/hooks/use-toast'
 
 interface Props {
   open: boolean
 }
 
-export function DeleteNumberDialog({ open }: Props) {
-  const { setOpen, currentNumber } = useNumbers()
+export function ProfileDeleteDialog({ open }: Props) {
+  const { setOpen, currentProfile } = useProfiles()
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  const { mutate: deleteNumber, isPending } = useMutation({
+  const { mutate: deleteProfile, isPending } = useMutation({
     mutationFn: () => 
-      numbersApi.release(currentNumber!.id),
+      profilesApi.delete(currentProfile!.id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['numbers'] })
-      toast({ title: 'Number deleted successfully' })
+      queryClient.invalidateQueries({ queryKey: ['profiles'] })
+      toast({ title: 'Profile deleted successfully' })
       setOpen(null)
     },
     onError: () => {
       toast({ 
-        title: 'Failed to delete number',
+        title: 'Failed to delete profile',
         variant: 'destructive'
       })
     }
@@ -34,10 +34,10 @@ export function DeleteNumberDialog({ open }: Props) {
     <Dialog open={open} onOpenChange={() => setOpen(null)}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Number</DialogTitle>
+          <DialogTitle>Delete Profile</DialogTitle>
         </DialogHeader>
         <div className="py-4">
-          Are you sure you want to delete the number {currentNumber?.number}? This action cannot be undone.
+          Are you sure you want to delete the profile {currentProfile?.name}? This action cannot be undone.
         </div>
         <div className="flex justify-end space-x-2">
           <Button variant="outline" onClick={() => setOpen(null)}>
@@ -45,7 +45,7 @@ export function DeleteNumberDialog({ open }: Props) {
           </Button>
           <Button 
             variant="destructive"
-            onClick={() => deleteNumber()}
+            onClick={() => deleteProfile()}
             disabled={isPending}
           >
             Delete

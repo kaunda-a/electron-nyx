@@ -4,19 +4,14 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 const path = require('path');
-const config = require('./src/utils/config');
-const logger = require('./src/utils/logger');
-
-// Disable SSL certificate validation for local development
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
+const config = require('./utils/config');
+const logger = require('./utils/logger');
 // Import routes
-const apiRoutes = require('./src/routes');
-
+const apiRoutes = require('./routes');
 // Import and register workflows
-require('./src/workflows/campaignLaunch');
-require('./src/workflows/enhancedCampaignLaunch');
-require('./src/workflows/batchCampaignLaunch');
+require('./workflows/campaignLaunch');
+require('./workflows/enhancedCampaignLaunch');
+require('./workflows/batchCampaignLaunch');
 
 class NyxServer {
     constructor() {

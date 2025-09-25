@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { 
   BarChart, 
-  LineChart, 
   PieChart, 
   BarChart3, 
   TrendingUp, 
-  Calendar, 
   Download,
   RefreshCw
 } from 'lucide-react';

@@ -14,7 +14,7 @@ class SystemController {
             status: 'stopped',
             startTime: null,
             uptime: 0,
-            version: require('../../package.json').version
+            version: require('../../../package.json').version
         };
         this.isRunning = false;
     }
