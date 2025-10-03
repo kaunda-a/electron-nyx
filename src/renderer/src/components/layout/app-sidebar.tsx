@@ -9,7 +9,7 @@ import { NavGroup } from '@/components/layout/nav-group'
 import { NavUser } from '@/components/layout/nav-user'
 import { Logo } from '@/components/icons/logo'
 import { getSidebarData } from './data/sidebar-data'
-import { useAuthStore } from '@/auth/api/stores/authStore'
+import { useAuthStore } from '@/lib/auth/store'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useAuthStore((state) => state.auth.user)

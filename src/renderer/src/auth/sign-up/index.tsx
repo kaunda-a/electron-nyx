@@ -1,7 +1,7 @@
-import { Link } from '@tanstack/react-router'
-import { Card } from '@/components/ui/card'
-import AuthLayout from '../auth-layout'
-import { SignUpForm } from './components/sign-up-form'
+import { Card } from '@/components/ui/card';
+import { Link } from '@tanstack/react-router';
+import AuthLayout from '../auth-layout';
+import { GoogleAuthForm } from '../google-auth-form';
 
 export default function SignUp() {
   return (
@@ -12,7 +12,7 @@ export default function SignUp() {
             Create an account
           </h1>
           <p className='text-sm text-muted-foreground'>
-            Enter your email and password to create an account. <br />
+            Sign in with your Google account to create an account. <br />
             Already have an account?{' '}
             <Link
               to='/sign-in'
@@ -22,7 +22,7 @@ export default function SignUp() {
             </Link>
           </p>
         </div>
-        <SignUpForm />
+        <GoogleAuthForm />
         <p className='mt-4 px-8 text-center text-sm text-muted-foreground'>
           By creating an account, you agree to our{' '}
           <a
@@ -42,5 +42,5 @@ export default function SignUp() {
         </p>
       </Card>
     </AuthLayout>
-  )
+  );
 }

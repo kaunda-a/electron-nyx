@@ -10,27 +10,36 @@ export function ThemeSwitch() {
   /* Update theme-color meta tag
    * when theme is updated */
   useEffect(() => {
-    const themeColor = theme === 'dark' ? '#020817' : '#fff'
+    let themeColor = '#fff';
+    if (theme === 'dark') {
+      themeColor = '#020817';
+    } else if (theme === 'black') {
+      themeColor = '#000000';
+    }
     const metaThemeColor = document.querySelector("meta[name='theme-color']")
     if (metaThemeColor) metaThemeColor.setAttribute('content', themeColor)
   }, [theme])
 
   const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark')
+    if (theme === 'light') {
+      setTheme('black');  // Switch to black/dark theme
+    } else {
+      setTheme('light');  // Switch back to light theme
+    }
   }
 
   return (
     <button
       onClick={toggleTheme}
       className={cn(
-        'relative h-8 w-16 rounded-full bg-secondary/50',
+        'relative h-8 w-14 rounded-full bg-secondary/50',  // Reduced width for 2-state switch
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary'
       )}
     >
       <motion.div 
         className="absolute inset-y-1 left-1 h-6 w-6 rounded-full bg-primary"
         animate={{
-          left: theme === 'dark' ? '2.25rem' : '0.25rem',
+          left: theme === 'light' ? '0.25rem' : '1.25rem',  // Animate between two positions only
         }}
         transition={{ 
           type: "spring", 
@@ -44,7 +53,7 @@ export function ThemeSwitch() {
             size={14} 
             className={cn(
               "transition-all duration-200",
-              theme === 'light' ? "opacity-100" : "opacity-40"
+              theme === 'light' ? "opacity-100 text-primary" : "opacity-40 text-muted-foreground"
             )}
           />
         </div>
@@ -53,7 +62,7 @@ export function ThemeSwitch() {
             size={14} 
             className={cn(
               "transition-all duration-200",
-              theme === 'dark' ? "opacity-100" : "opacity-40"
+              theme === 'black' ? "opacity-100 text-primary" : "opacity-40 text-muted-foreground"
             )}
           />
         </div>

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
-type Theme = 'light' | 'dark'
+type Theme = 'light' | 'dark' | 'black'
 
 interface ThemeContextType {
   theme: Theme
@@ -27,7 +27,7 @@ export function ThemeProvider({
 
   useEffect(() => {
     const root = window.document.documentElement
-    root.classList.remove('light', 'dark')
+    root.classList.remove('light', 'dark', 'black')
     root.classList.add(theme)
     localStorage.setItem(storageKey, theme)
   }, [theme, storageKey])

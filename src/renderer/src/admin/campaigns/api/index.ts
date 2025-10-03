@@ -1,4 +1,5 @@
 import { api } from '@/lib/api';
+import { sqliteCampaignsApi } from '@/lib/ipc/sqliteCampaignsApi';
 
 // Types based on the server-side Campaign model
 export interface Campaign {
@@ -205,19 +206,44 @@ export const campaignsApi = {
   /**
    * Get a list of campaigns
    */
-  list: async (): Promise<Campaign[]> => {
+  list: async (useDatabaseStorage = false): Promise<Campaign[]> => {
     try {
-      // Try to get campaigns from server
-      const response = await api.get('/api/campaigns');
-      const campaigns = Array.isArray(response) ? response : (response?.data || []);
+      let campaigns: Campaign[] = [];
+      
+      if (useDatabaseStorage) {
+        // Get campaigns from SQLite
+        campaigns = await sqliteCampaignsApi.list();
+        
+        // Also get from server and merge
+        try {
+          const serverCampaigns = await window.api.campaigns.getAll();
+          
+          // Merge server and SQLite campaigns (prefer server data if conflict)
+          const allCampaigns = [...serverCampaigns];
+          for (const sqliteCampaign of campaigns) {
+            const existingIndex = allCampaigns.findIndex(c => c.id === sqliteCampaign.id);
+            if (existingIndex === -1) {
+              allCampaigns.push(sqliteCampaign);
+            }
+          }
+          
+          campaigns = allCampaigns;
+        } catch (serverError) {
+          console.warn('Failed to fetch campaigns from server, using SQLite data:', serverError);
+          // Use SQLite data as fallback
+        }
+      } else {
+        // Get campaigns directly from IPC
+        campaigns = await window.api.campaigns.getAll();
+      }
       
       // Cache campaigns in localStorage
       saveCampaignsToLocalStorage(campaigns);
       
       return campaigns;
     } catch (error) {
-      // If server request fails, try to load from localStorage
-      console.warn('Failed to fetch campaigns from server, loading from cache:', error);
+      // If server/SQLite request fails, try to load from localStorage
+      console.warn('Failed to fetch campaigns, loading from cache:', error);
       const cachedCampaigns = loadCampaignsFromLocalStorage();
       
       if (cachedCampaigns.length > 0) {
@@ -232,10 +258,22 @@ export const campaignsApi = {
   /**
    * Get a specific campaign by ID
    */
-  get: async (campaignId: string): Promise<Campaign> => {
+  get: async (campaignId: string, useDatabaseStorage = false): Promise<Campaign> => {
     try {
-      const response = await api.get(`/api/campaigns/${campaignId}`);
-      return response?.data || {};
+      if (useDatabaseStorage) {
+        // Try SQLite first
+        let campaign = await sqliteCampaignsApi.get(campaignId);
+        
+        if (campaign) {
+          return campaign;
+        }
+        
+        // Fallback to IPC
+        return await window.api.campaigns.getById(campaignId) || {};
+      } else {
+        const campaign = await window.api.campaigns.getById(campaignId);
+        return campaign || {};
+      }
     } catch (error) {
       // Try to find in localStorage cache
       const cachedCampaigns = loadCampaignsFromLocalStorage();
@@ -252,10 +290,19 @@ export const campaignsApi = {
   /**
    * Create a new campaign
    */
-  create: async (campaignData: CampaignCreate): Promise<Campaign> => {
+  create: async (campaignData: CampaignCreate, useDatabaseStorage = false): Promise<Campaign> => {
     try {
-      const response = await api.post('/api/campaigns', campaignData);
-      const newCampaign = response?.data || campaignData;
+      let newCampaign: Campaign;
+      
+      if (useDatabaseStorage) {
+        // Create via IPC first
+        newCampaign = await window.api.campaigns.create({ ...campaignData, useDatabaseStorage: true });
+        
+        // Also save to SQLite
+        await sqliteCampaignsApi.save(newCampaign.id, newCampaign);
+      } else {
+        newCampaign = await window.api.campaigns.create(campaignData);
+      }
       
       // Update localStorage cache
       const cachedCampaigns = loadCampaignsFromLocalStorage();
@@ -273,11 +320,21 @@ export const campaignsApi = {
    */
   update: async (
     campaignId: string,
-    updateData: CampaignUpdate
+    updateData: CampaignUpdate,
+    useDatabaseStorage = false
   ): Promise<Campaign> => {
     try {
-      const response = await api.put(`/api/campaigns/${campaignId}`, updateData);
-      const updatedCampaign = response?.data || updateData;
+      let updatedCampaign: Campaign;
+      
+      if (useDatabaseStorage) {
+        // Update via IPC first
+        updatedCampaign = await window.api.campaigns.update(campaignId, { ...updateData, useDatabaseStorage: true });
+        
+        // Also update SQLite
+        await sqliteCampaignsApi.save(campaignId, updatedCampaign);
+      } else {
+        updatedCampaign = await window.api.campaigns.update(campaignId, updateData);
+      }
       
       // Update localStorage cache
       const cachedCampaigns = loadCampaignsFromLocalStorage();
@@ -296,9 +353,15 @@ export const campaignsApi = {
   /**
    * Delete a campaign
    */
-  delete: async (campaignId: string): Promise<void> => {
+  delete: async (campaignId: string, useDatabaseStorage = false): Promise<void> => {
     try {
-      await api.delete(`/api/campaigns/${campaignId}`);
+      if (useDatabaseStorage) {
+        // Delete from IPC (with database storage flag) and SQLite
+        await window.api.campaigns.delete(campaignId, { data: { useDatabaseStorage: true } });
+        await sqliteCampaignsApi.delete(campaignId);
+      } else {
+        await window.api.campaigns.delete(campaignId);
+      }
     } catch (error) {
       // Even if the server returns an error, we still want to update the local cache
       // This handles cases where the campaign was already deleted on the server
@@ -323,8 +386,8 @@ export const campaignsApi = {
    */
   getStats: async (): Promise<CampaignStats> => {
     try {
-      const response = await api.get('/api/campaigns/stats');
-      return response?.data || {
+      const stats = await window.api.campaigns.getStats();
+      return stats || {
         total: 0,
         active: 0,
         byStatus: {},
@@ -347,8 +410,8 @@ export const campaignsApi = {
     options: CampaignLaunchOptions = {}
   ): Promise<CampaignLaunchResponse> => {
     try {
-      const response = await api.post(`/api/campaigns/${campaignId}/launch`, options);
-      return response?.data;
+      const response = await window.api.campaigns.launch(campaignId, options);
+      return response;
     } catch (error) {
       throw error;
     }
@@ -360,8 +423,8 @@ export const campaignsApi = {
    */
   getProgress: async (campaignId: string): Promise<CampaignProgress> => {
     try {
-      const response = await api.get(`/api/campaigns/${campaignId}/progress`);
-      return response?.data || {
+      const response = await window.api.campaigns.getProgress(campaignId);
+      return response || {
         campaignId,
         status: 'pending',
         progress: 0
@@ -371,9 +434,6 @@ export const campaignsApi = {
     }
   },
 
-  /**
-   * Clear local storage cache
-   */
   /**
    * Clear local storage cache
    */
@@ -387,8 +447,8 @@ export const campaignsApi = {
    */
   export: async (campaignIds?: string[]): Promise<any> => {
     try {
-      const response = await api.post('/api/campaigns/export', { campaignIds });
-      return response;
+      // For export, use the IPC method directly
+      return await window.api.campaigns.export(campaignIds || []);
     } catch (error) {
       throw error;
     }
@@ -400,7 +460,7 @@ export const campaignsApi = {
    */
   import: async (data: any): Promise<any> => {
     try {
-      const response = await api.post('/api/campaigns/import', data);
+      const response = await window.api.campaigns.import(data);
       return response;
     } catch (error) {
       throw error;

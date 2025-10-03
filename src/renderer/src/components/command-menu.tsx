@@ -14,28 +14,13 @@ import {
   CommandSeparator,
 } from './ui/command'
 import { ScrollArea } from './ui/scroll-area'
-import { create } from 'zustand'
-import type { User } from '@supabase/supabase-js'
 import { getSidebarData } from './layout/data/sidebar-data'
 import type { NavGroup, NavItem, SidebarData } from './layout/types'
-
-interface AuthState {
-  auth: {
-    user: User | null;
-    setUser: (user: User | null) => void;
-  }
-}
-
-export const useAuthStore = create<AuthState>((set) => ({
-  auth: {
-    user: null,
-    setUser: (user) => set((state) => ({ auth: { ...state.auth, user } })),
-  }
-}))
+import { useAuthStore } from '@/lib/auth'
 
 export function CommandMenu({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) {
   const navigate = useNavigate()
-  const user = useAuthStore((state: AuthState) => state.auth.user)
+  const user = useAuthStore((state) => state.auth.user)
   const { theme, setTheme } = useTheme()
   const sidebarData: SidebarData = getSidebarData(user)
 
@@ -89,11 +74,11 @@ export function CommandMenu({ open, setOpen }: { open: boolean; setOpen: (open: 
           <CommandSeparator />
           <CommandGroup heading='Theme'>
             <div className="px-4 py-2">
-              <div className="relative h-9 w-[200px] mx-auto rounded-full bg-secondary/50">
+              <div className="relative h-9 w-[294px] mx-auto rounded-full bg-secondary/50">
                 <motion.div 
-                  className="absolute inset-y-0.5 left-0.5 w-[98px] rounded-full bg-primary/20 backdrop-blur-sm"
+                  className="absolute inset-y-0.5 left-0.5 w-[95px] rounded-full bg-primary/20 backdrop-blur-sm"
                   animate={{
-                    left: theme === 'light' ? '0.125rem' : '100px',
+                    left: theme === 'light' ? '0.125rem' : theme === 'dark' ? '100px' : '198px',
                   }}
                   transition={{ 
                     type: "spring", 
@@ -113,7 +98,7 @@ export function CommandMenu({ open, setOpen }: { open: boolean; setOpen: (open: 
                       className={cn(
                         "transition-transform duration-200",
                         theme === 'light' && "rotate-0 scale-110",
-                        theme !== 'light' && "-rotate-90 scale-90"
+                        theme !== 'light' && "rotate-90 scale-90"
                       )}
                     />
                     <span className="text-sm font-medium">Light</span>
@@ -133,6 +118,16 @@ export function CommandMenu({ open, setOpen }: { open: boolean; setOpen: (open: 
                       )}
                     />
                     <span className="text-sm font-medium">Dark</span>
+                  </button>
+                  <button
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-2 transition-colors duration-200",
+                      theme === 'black' ? "text-primary" : "text-muted-foreground"
+                    )}
+                    onClick={() => setTheme('black')}
+                  >
+                    <span className="text-xs font-bold">BK</span>
+                    <span className="text-sm font-medium">Black</span>
                   </button>
                 </div>
               </div>

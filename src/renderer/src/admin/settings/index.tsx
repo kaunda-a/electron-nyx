@@ -10,6 +10,7 @@ import {
   IconFingerprint,
   IconShieldLock,
   IconEye,
+  IconCreditCard,
 } from '@tabler/icons-react'
 import { Separator } from '@/components/ui/separator'
 import { Header } from '@/components/layout/header'
@@ -26,7 +27,7 @@ import {
 } from './components'
 
 // Import CSS effects
-import './styles/effects.css'
+import './components/styles/effects.css'
 
 export default function Settings() {
   return (
@@ -109,6 +110,11 @@ const sidebarNavItems = [
     title: 'Display',
     icon: <IconBrowserCheck size={18} />,
     href: '/settings/display',
+  },
+  {
+    title: 'Billing',
+    icon: <IconCreditCard size={18} />,
+    href: '/settings/billing',
   },
   {
     title: 'Anti-Detection',

@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Link } from '@tanstack/react-router'
-import { useAuthStore } from '@/auth/api/stores/authStore'
+import { useAuthStore } from '@/lib/auth/store'
 
 export function ProfileDropdown() {
   const user = useAuthStore((state) => state.auth.user)
@@ -32,7 +32,7 @@ export function ProfileDropdown() {
   const initials = displayName.slice(0, 2).toUpperCase()
 
   return (
-    <DropdownMenu modal={false}>
+    <DropdownMenu modal={true}>
       <DropdownMenuTrigger asChild>
         <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
           <Avatar className='h-8 w-8'>
@@ -41,7 +41,7 @@ export function ProfileDropdown() {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className='w-56' align='end' forceMount>
+      <DropdownMenuContent className='w-56 backdrop-blur-sm bg-popover/90'>
         <DropdownMenuLabel className='font-normal'>
           <div className='flex flex-col space-y-1'>
             <p className='text-sm font-medium leading-none'>{displayName}</p>

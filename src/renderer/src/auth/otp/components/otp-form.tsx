@@ -16,7 +16,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { PinInput, PinInputField } from '@/components/pin-input'
-import { useAuth } from '@/auth/api/stores/authStore'
+import { useAuthStore } from '@/lib/auth'
 import { Logo } from '@/components/icons/logo'
 
 type OtpFormProps = HTMLAttributes<HTMLDivElement>
@@ -33,7 +33,9 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
   const search = useSearch({ from: '/(auth)/otp' })
   const [isLoading, setIsLoading] = useState(false)
   const [disabledBtn, setDisabledBtn] = useState(true)
-  const { verifyOtp } = useAuth()
+  const verifyOtp = useAuthStore((state) => state.auth.verifyOtp)
+  const authError = useAuthStore((state) => state.auth.error)
+  const isLoadingAuth = useAuthStore((state) => state.auth.isLoading)
 
   // Get email from URL search params
   const email = search.email
@@ -55,7 +57,7 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
 
     try {
       setIsLoading(true)
-      await verifyOtp(data.otp, email)
+      await verifyOtp(data.otp, email) // useIpc will default to store's setting
       toast({
         title: 'Success',
         description: 'OTP verification successful.',
@@ -68,7 +70,7 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Invalid OTP code. Please try again.',
+        description: authError || 'Invalid OTP code. Please try again.',
       })
     } finally {
       setIsLoading(false)
@@ -120,12 +122,12 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
             />
             <Button
               type="submit"
-              disabled={isLoading || disabledBtn}
+              disabled={isLoading || isLoadingAuth || disabledBtn}
               className="w-full"
             >
-              {isLoading && (
+              {isLoading || isLoadingAuth ? (
                 <Logo className="mr-2 h-4 w-4 animate-spin" />
-              )}
+              ) : null}
               Verify Account
             </Button>
           </div>

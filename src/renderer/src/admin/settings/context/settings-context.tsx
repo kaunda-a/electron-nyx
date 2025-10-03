@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { settingsApi, ServerSettings, ServerSettingsUpdate } from '../api/settings-api';
-import { settingsDb, UserSettings, SettingsUpdate } from '../db/settings-db';
+import { settingsApi, ServerSettings, ServerSettingsUpdate } from '../components/settings-api';
+import { settingsDb, UserSettings, SettingsUpdate } from '../components/settings-db';
 
 // Combined settings type that merges server and client settings
 export interface CombinedSettings {
   // Theme settings
-  theme: 'light' | 'dark' | 'system';
+  theme: 'light' | 'dark' | 'black' | 'system';
   font: string;
 
   // Notification settings
@@ -78,7 +78,7 @@ interface SettingsContextType {
   error: Error | null;
 
   // Theme methods
-  updateTheme: (theme: 'light' | 'dark' | 'system') => Promise<void>;
+  updateTheme: (theme: 'light' | 'dark' | 'black' | 'system') => Promise<void>;
   updateFont: (font: string) => Promise<void>;
 
   // Notification methods
@@ -265,11 +265,13 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
   }, []);
 
   // Update theme
-  const updateTheme = async (theme: 'light' | 'dark' | 'system') => {
+  const updateTheme = async (theme: 'light' | 'dark' | 'black' | 'system') => {
     try {
       // Update server first
       try {
-        await settingsApi.updateTheme(theme);
+        // Convert 'black' to 'dark' for server since it might not support 'black' theme
+        const serverTheme = theme === 'black' ? 'dark' : theme;
+        await settingsApi.updateTheme(serverTheme);
       } catch (serverError) {
         console.error('Error updating theme on server:', serverError);
         // Continue even if server update fails

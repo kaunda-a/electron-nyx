@@ -12,7 +12,7 @@ export function Logo({ className, size = 32 }: LogoProps) {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <div className="flex items-center gap-3 px-2">
+        <div className="px-2">
           <div className={cn('relative inline-flex items-center justify-center', className)}>
             {/* Glow effect */}
             <motion.div
@@ -28,7 +28,7 @@ export function Logo({ className, size = 32 }: LogoProps) {
               }}
             />
             
-            {/* Custom Nyx Spider Logo */}
+            {/* Nyx Spider Logo - Using the same design as favicon.svg */}
             <motion.svg
               width={size}
               height={size}
@@ -40,67 +40,40 @@ export function Logo({ className, size = 32 }: LogoProps) {
               whileHover={{ rotate: 180, scale: 1.1 }}
               transition={{ duration: 0.3 }}
             >
+              <style>
+                {`
+                  path, circle { 
+                    stroke: hsl(var(--primary)); 
+                    fill: none; 
+                    stroke-width: 1.5;
+                  }
+                  circle.eye { 
+                    fill: hsl(var(--primary)); 
+                  }
+                `}
+              </style>
+              
               {/* Main body - hexagon */}
-              <motion.path
-                d="M12 4L18 8V16L12 20L6 16V8L12 4Z"
-                className="stroke-primary"
-                strokeWidth="1.5"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 1.5, ease: "easeInOut" }}
-              />
+              <path d="M12 4L18 8V16L12 20L6 16V8L12 4Z"/>
               
               {/* Spider legs */}
-              <motion.g
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-              >
+              <g>
                 {/* Left legs */}
-                <path d="M6 12L3 9" className="stroke-primary" strokeWidth="1.5" />
-                <path d="M6 12L2 12" className="stroke-primary" strokeWidth="1.5" />
-                <path d="M6 12L3 15" className="stroke-primary" strokeWidth="1.5" />
+                <path d="M6 12L3 9"/>
+                <path d="M6 12L2 12"/>
+                <path d="M6 12L3 15"/>
                 
                 {/* Right legs */}
-                <path d="M18 12L21 9" className="stroke-primary" strokeWidth="1.5" />
-                <path d="M18 12L22 12" className="stroke-primary" strokeWidth="1.5" />
-                <path d="M18 12L21 15" className="stroke-primary" strokeWidth="1.5" />
-              </motion.g>
+                <path d="M18 12L21 9"/>
+                <path d="M18 12L22 12"/>
+                <path d="M18 12L21 15"/>
+              </g>
               
               {/* Eyes */}
-              <motion.g
-                animate={{
-                  scale: [1, 1.2, 1],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              >
-                <circle cx="10" cy="12" r="1" className="fill-primary" />
-                <circle cx="14" cy="12" r="1" className="fill-primary" />
-              </motion.g>
+              <circle cx="10" cy="12" r="1" className="eye"/>
+              <circle cx="14" cy="12" r="1" className="eye"/>
             </motion.svg>
           </div>
-          
-          <motion.div 
-            className="grid flex-1 text-left text-sm leading-tight"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <motion.span 
-              className="truncate font-semibold"
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.2 }}
-            >
-             
-            </motion.span>
-            <span className="truncate text-xs text-muted-foreground">
-             
-            </span>
-          </motion.div>
         </div>
       </SidebarMenuItem>
     </SidebarMenu>

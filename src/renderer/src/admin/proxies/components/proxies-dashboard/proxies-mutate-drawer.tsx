@@ -143,6 +143,16 @@ export function ProxiesMutateDrawer({ open, onOpenChange, currentRow }: Props) {
   const onSubmit = async (values: ProxyForm) => {
     setIsSubmitting(true)
     try {
+      // Check if proxy validation API is available before proceeding
+      if (typeof window === 'undefined' || !window.api || !window.api.proxies || !window.api.proxies.validate) {
+        toast({
+          title: "Validation Service Unavailable",
+          description: "Proxy validation service is not available. Please ensure the application is properly initialized.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Auto-validate the proxy before saving
       setValidationResult(null);
 
@@ -290,6 +300,16 @@ export function ProxiesMutateDrawer({ open, onOpenChange, currentRow }: Props) {
 
                         // Validate the parsed proxy
                         try {
+                          // Check if proxy validation API is available before proceeding
+                          if (typeof window === 'undefined' || !window.api || !window.api.proxies || !window.api.proxies.validate) {
+                            toast({
+                              title: "Validation Service Unavailable",
+                              description: "Proxy validation service is not available. Please ensure the application is properly initialized.",
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+
                           toast({
                             title: "Validating Parsed Proxy",
                             description: "Testing proxy connectivity...",
@@ -554,6 +574,16 @@ export function ProxiesMutateDrawer({ open, onOpenChange, currentRow }: Props) {
                             size="sm"
                             disabled={!form.watch('host') || !form.watch('port') || isValidating}
                             onClick={async () => {
+                              // Check if proxy validation API is available before proceeding
+                              if (typeof window === 'undefined' || !window.api || !window.api.proxies || !window.api.proxies.validate) {
+                                toast({
+                                  title: "Validation Service Unavailable",
+                                  description: "Proxy validation service is not available. Please ensure the application is properly initialized.",
+                                  variant: "destructive",
+                                });
+                                return;
+                              }
+
                               setIsValidating(true);
                               setValidationResult(null);
                               try {

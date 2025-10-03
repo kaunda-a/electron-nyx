@@ -1,17 +1,25 @@
 const express = require('express');
 const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 const compression = require('compression');
+const helmet = require('helmet');
 const path = require('path');
-const config = require('./utils/config');
-const logger = require('./utils/logger');
-// Import routes
-const apiRoutes = require('./routes');
+const fs = require('fs-extra');
+const config = require('./shared/config/config');
+const logger = require('./shared/utils/logger');
+// Import individual route modules from domains
+const proxyRoutes = require('./domains/proxies/routes/proxies');
+const profileRoutes = require('./domains/profiles/routes/profiles');
+const campaignRoutes = require('./domains/campaigns/routes/campaigns');
+const authRoutes = require('./domains/auth/routes/auth');
+const SystemController = require('./system/controllers/systemController');
+
+// Create controller instance
+const systemController = new SystemController();
+
 // Import and register workflows
-require('./workflows/campaignLaunch');
-require('./workflows/enhancedCampaignLaunch');
-require('./workflows/batchCampaignLaunch');
+require('./domains/campaigns/workflows/campaignLaunch');
+require('./domains/campaigns/workflows/enhancedCampaignLaunch');
+require('./domains/campaigns/workflows/batchCampaignLaunch');
 
 class NyxServer {
     constructor() {
@@ -47,6 +55,10 @@ class NyxServer {
             console.log('Debug: Setting up error handling...');
             this.setupErrorHandling();
 
+            // Start rate limiting cleanup
+            const rateLimitService = require('./domains/auth/services/rateLimitService');
+            rateLimitService.startCleanup();
+
             this.isInitialized = true;
             console.log('Debug: Server initialization completed');
             logger.info('Nyx server initialization completed');
@@ -66,7 +78,14 @@ class NyxServer {
         logger.info('Initializing core services');
 
         try {
-            // Services are now initialized on demand by controllers
+            // Initialize the hybrid database service for offline-first functionality
+            const hybridDatabaseService = require('./sqlite/hybridDatabaseService');
+            await hybridDatabaseService.initialize();
+            
+            // Initialize the sync service for cloud synchronization
+            const syncService = require('./system/services/syncService');
+            await syncService.initialize();
+            
             console.log('Debug: Core services initialization completed');
             logger.info('Core services initialized successfully');
 
@@ -95,18 +114,34 @@ class NyxServer {
             credentials: true
         }));
 
-        // Rate limiting
-        const limiter = rateLimit({
-            windowMs: 15 * 60 * 1000, // 15 minutes
-            max: 1000, // Limit each IP to 1000 requests per windowMs
-            message: {
-                error: 'Too many requests from this IP, please try again later.',
-                retryAfter: '15 minutes'
-            },
-            standardHeaders: true,
-            legacyHeaders: false
+        // Import enhanced rate limiting
+        const { createUserRateLimiter, createAuthRateLimiter, createHeavyOperationRateLimiter } = require('./domains/auth/middleware/userRateLimitMiddleware');
+
+        // Rate limiting - General API rate limiting (user-aware)
+        const generalLimiter = createUserRateLimiter({
+            category: 'general',
+            max: 1000,
+            windowMs: 15 * 60 * 1000 // 15 minutes
         });
-        this.app.use('/api/', limiter);
+
+        // Rate limiting - Auth endpoints (more restrictive)
+        const authLimiter = createAuthRateLimiter({
+            max: 20,
+            windowMs: 15 * 60 * 1000 // 15 minutes
+        });
+
+        // Rate limiting - Heavy endpoints (campaigns, profiles) - more restrictive
+        const heavyOperationLimiter = createHeavyOperationRateLimiter({
+            max: 100,
+            windowMs: 60 * 60 * 1000 // 1 hour
+        });
+
+        // Apply rate limiting
+        this.app.use('/api/', generalLimiter);
+        this.app.use('/api/auth', authLimiter);
+        this.app.use('/api/campaigns', heavyOperationLimiter);
+        this.app.use('/api/profiles', heavyOperationLimiter);
+        this.app.use('/api/proxies', heavyOperationLimiter);
 
         // Compression
         this.app.use(compression());
@@ -149,8 +184,18 @@ class NyxServer {
      * Setup API routes
      */
     setupRoutes() {
-        // Mount API routes
-        this.app.use('/api', apiRoutes);
+        // Mount individual domain routes under /api
+        this.app.use('/api/auth', authRoutes);
+        this.app.use('/api/proxies', proxyRoutes);
+        this.app.use('/api/profiles', profileRoutes);
+        this.app.use('/api/campaigns', campaignRoutes);
+        this.app.use('/api/license', require('./domains/auth/routes/license'));
+        this.app.use('/api/payments', require('./domains/payments/routes/payments'));
+        this.app.use('/api/webhooks', require('./domains/payments/routes/webhooks'));
+
+        // System routes
+        this.app.get('/api/status', systemController.getSystemStatus.bind(systemController));
+        this.app.get('/api/stats', systemController.getSystemStats.bind(systemController));
 
         // Root endpoint
         this.app.get('/', (req, res) => {
@@ -215,7 +260,7 @@ class NyxServer {
      */
     setupErrorHandling() {
         // 404 handler
-        this.app.use('*', (req, res) => {
+        this.app.use((req, res) => {
             res.status(404).json({
                 error: 'Endpoint not found',
                 message: `The requested endpoint ${req.method} ${req.originalUrl} was not found`,

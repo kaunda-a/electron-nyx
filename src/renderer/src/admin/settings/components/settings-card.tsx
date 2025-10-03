@@ -4,7 +4,7 @@ import { GlassCard } from '@/admin/settings/components/ui/glass-card';
 import { GradientBorder } from '@/admin/settings/components/ui/gradient-border';
 import { NeonText } from '@/admin/settings/components/ui/neon-text';
 import { MorphismCard } from '@/admin/settings/components/ui/morphism-card';
-import { styles } from '@/admin/settings/styles';
+import { styles } from '@/admin/settings/components/styles';
 
 interface SettingsCardProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;

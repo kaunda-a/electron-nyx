@@ -1,0 +1,94 @@
+-- Create profiles table
+CREATE TABLE profiles (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    config TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    metadata TEXT,
+    path TEXT,
+    user_id TEXT,
+    session TEXT
+);
+
+-- Create campaigns table
+CREATE TABLE campaigns (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    status TEXT DEFAULT 'draft',
+    type TEXT,
+    settings TEXT,
+    targeting TEXT,
+    schedule TEXT,
+    targets TEXT,
+    profiles TEXT,
+    performance TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    created_by TEXT,
+    tags TEXT,
+    priority TEXT DEFAULT 'medium'
+);
+
+-- Create proxies table
+CREATE TABLE proxies (
+    id TEXT PRIMARY KEY,
+    host TEXT NOT NULL,
+    port INTEGER NOT NULL,
+    protocol TEXT DEFAULT 'http',
+    username TEXT,
+    password TEXT,
+    country TEXT,
+    status TEXT DEFAULT 'active',
+    failure_count INTEGER DEFAULT 0,
+    success_count INTEGER DEFAULT 0,
+    average_response_time REAL DEFAULT 0,
+    assigned_profiles TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    geolocation TEXT,
+    ip TEXT,
+    is_assigned BOOLEAN DEFAULT FALSE,
+    assigned_profile_id TEXT,
+    assigned_at TIMESTAMPTZ
+);
+
+-- Create user_settings table
+CREATE TABLE user_settings (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    theme TEXT DEFAULT 'dark',
+    font TEXT DEFAULT 'inter',
+    notifications TEXT,
+    display TEXT,
+    account TEXT,
+    profile TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    metadata TEXT
+);
+
+
+
+-- Create sync_queue table
+CREATE TABLE sync_queue (
+    id SERIAL PRIMARY KEY,
+    table_name TEXT NOT NULL,
+    operation TEXT NOT NULL,
+    record_id TEXT,
+    data TEXT,
+    timestamp TIMESTAMPTZ DEFAULT NOW(),
+    status TEXT DEFAULT 'pending',
+    retries INTEGER DEFAULT 0,
+    error_message TEXT
+);
+
+-- Create indexes for better performance
+CREATE INDEX idx_profiles_user_id ON profiles(user_id);
+CREATE INDEX idx_campaigns_created_by ON campaigns(created_by);
+CREATE INDEX idx_proxies_status ON proxies(status);
+CREATE INDEX idx_user_settings_user_id ON user_settings(user_id);
+CREATE INDEX idx_sync_queue_status ON sync_queue(status);
+CREATE INDEX idx_sync_queue_timestamp ON sync_queue(timestamp);

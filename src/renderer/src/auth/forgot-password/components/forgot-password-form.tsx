@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
-import { useAuth } from '@/auth/api/stores/authStore'
+import { useAuthStore } from '@/lib/auth'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 type ForgotFormProps = HTMLAttributes<HTMLDivElement>
 
@@ -29,7 +30,9 @@ const formSchema = z.object({
 export function ForgotForm({ className, ...props }: ForgotFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
-  const { sendPasswordResetEmail } = useAuth()
+  const sendPasswordResetEmail = useAuthStore((state) => state.auth.sendPasswordResetEmail)
+  const authError = useAuthStore((state) => state.auth.error)
+  const isLoadingAuth = useAuthStore((state) => state.auth.isLoading)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -39,7 +42,7 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
   async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true)
-      await sendPasswordResetEmail(data.email)
+      await sendPasswordResetEmail(data.email) // useIpc will default to store's setting
       toast({
         title: 'Check your email',
         description: 'We have sent you a password reset link.',
@@ -52,7 +55,7 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to send reset link. Please try again.',
+        description: authError || 'Failed to send reset link. Please try again.',
       })
     } finally {
       setIsLoading(false)
@@ -82,8 +85,8 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
                 </FormItem>
               )}
             />
-            <Button className='mt-2' disabled={isLoading}>
-              {isLoading ? 'Sending...' : 'Send Reset Link'}
+            <Button className='mt-2' disabled={isLoading || isLoadingAuth}>
+              {isLoading || isLoadingAuth ? 'Sending...' : 'Send Reset Link'}
             </Button>
           </div>
         </form>

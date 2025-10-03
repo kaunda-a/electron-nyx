@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { NeonText } from '@/admin/settings/components/ui/neon-text';
 import { SkeletonLoader } from '@/admin/settings/components/ui/skeleton-loader';
-import { styles } from '@/admin/settings/styles';
+import { styles } from '@/admin/settings/components/styles';
 
 interface SettingsSectionProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;

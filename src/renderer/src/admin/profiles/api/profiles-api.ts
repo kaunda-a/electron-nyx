@@ -1,4 +1,4 @@
-import { api } from '@/lib/api';
+import { sqliteProfilesApi } from '@/lib/ipc/sqliteProfilesApi';
 
 // Types
 export interface Screen {
@@ -231,30 +231,48 @@ export const profilesApi = {
   /**
    * Create a new browser profile
    */
-  create: async (profileData: ProfileCreate): Promise<Profile> => {
-    const response = await api.post('/api/profiles', profileData);
-    return response?.data;
+  create: async (profileData: ProfileCreate, useDatabaseStorage = false): Promise<Profile> => {
+    if (useDatabaseStorage) {
+      // Create via SQLite
+      const profileId = profileData.name || `profile_${Date.now()}`;
+      const profileWithId = { ...profileData, id: profileId, created_at: new Date().toISOString() };
+      await sqliteProfilesApi.save(profileId, profileWithId);
+      return profileWithId as Profile;
+    }
+    return await window.api.profiles.create(profileData);
   },
 
   /**
    * Get a list of profiles
    */
-  list: async (filters?: ProfileFilters): Promise<Profile[]> => {
+  list: async (filters?: ProfileFilters, useDatabaseStorage = false): Promise<Profile[]> => {
     try {
-      const response = await api.get('/api/profiles', { params: filters });
-      
-      // The api client already returns response.data, so response should be the array of profiles
-      if (Array.isArray(response)) {
-        return response;
+      if (useDatabaseStorage) {
+        // Get profiles from SQLite
+        const sqliteProfiles = await sqliteProfilesApi.list();
+        
+        // Also get from main process and merge
+        try {
+          const mainProcessProfiles = await window.api.profiles.getAll(filters);
+          
+          // Merge SQLite and main process profiles (prefer main process data if conflict)
+          const allProfiles = [...mainProcessProfiles];
+          for (const sqliteProfile of sqliteProfiles) {
+            const existingIndex = allProfiles.findIndex(p => p.id === sqliteProfile.id);
+            if (existingIndex === -1) {
+              allProfiles.push(sqliteProfile);
+            }
+          }
+          
+          return allProfiles;
+        } catch (mainProcessError) {
+          console.warn('Failed to fetch profiles from main process, using SQLite data:', mainProcessError);
+          // Use SQLite data as fallback
+          return sqliteProfiles;
+        }
+      } else {
+        return await window.api.profiles.getAll(filters);
       }
-      
-      // If we get an object with a data property that's an array
-      if (response && Array.isArray(response.data)) {
-        return response.data;
-      }
-      
-      // Fallback to empty array
-      return [];
     } catch (error) {
       console.error('Error fetching profiles:', error);
       return [];
@@ -264,9 +282,19 @@ export const profilesApi = {
   /**
    * Get a specific profile by ID
    */
-  get: async (profileId: string): Promise<Profile> => {
-    const response = await api.get(`/api/profiles/${profileId}`);
-    return response?.data;
+  get: async (profileId: string, useDatabaseStorage = false): Promise<Profile> => {
+    if (useDatabaseStorage) {
+      // Try SQLite first
+      let profile = await sqliteProfilesApi.get(profileId);
+      
+      if (profile) {
+        return profile;
+      }
+      
+      // Fallback to main process
+      return await window.api.profiles.getById(profileId);
+    }
+    return await window.api.profiles.getById(profileId);
   },
 
   /**
@@ -276,17 +304,22 @@ export const profilesApi = {
     profileId: string,
     updateData: ProfileUpdate
   ): Promise<Profile> => {
-    const response = await api.put(`/api/profiles/${profileId}`, updateData);
-    return response?.data;
+    return await window.api.profiles.update(profileId, updateData);
   },
 
   /**
    * Delete a profile
    */
-  delete: async (profileId: string): Promise<void> => {
+  delete: async (profileId: string, useDatabaseStorage = false): Promise<void> => {
     console.log('Deleting profile with ID:', profileId);
     try {
-      await api.delete(`/api/profiles/${profileId}`);
+      if (useDatabaseStorage) {
+        // Delete from main process and SQLite
+        await window.api.profiles.delete(profileId);
+        await sqliteProfilesApi.delete(profileId);
+      } else {
+        await window.api.profiles.delete(profileId);
+      }
       console.log('Profile deleted successfully:', profileId);
     } catch (error) {
       console.error('Failed to delete profile:', profileId, error);
@@ -298,24 +331,21 @@ export const profilesApi = {
    * Get detailed statistics for a profile
    */
   getStats: async (profileId: string): Promise<ProfileStats> => {
-    const response = await api.get(`/api/profiles/${profileId}/stats`);
-    return response?.data;
+    return await window.api.profiles.getStats(profileId);
   },
 
   /**
    * Get the actual fingerprint for a profile
    */
   getFingerprint: async (profileId: string): Promise<FingerprintData> => {
-    const response = await api.get(`/api/profiles/${profileId}/fingerprint`);
-    return response;
+    return await window.api.profiles.getFingerprint(profileId);
   },
 
   /**
    * Create multiple unique profiles at once
    */
   createBatch: async (batchConfig: BatchProfileCreate): Promise<BatchProfileResponse> => {
-    const response = await api.post('/api/profiles/batch', batchConfig);
-    return response?.data;
+    return await window.api.profiles.batchCreate(batchConfig);
   },
 
   /**
@@ -330,16 +360,7 @@ export const profilesApi = {
       humanize?: boolean;
     } = {}
   ): Promise<Record<string, any>> => {
-    const params = new URLSearchParams();
-
-    params.set('headless', String(options.headless ?? false));
-    params.set('use_proxy', String(options.useProxy ?? true));
-
-    if (options.geoip !== undefined) params.set('geoip', String(options.geoip));
-    if (options.humanize !== undefined) params.set('humanize', String(options.humanize));
-
-    const response = await api.post(`/api/profiles/${profileId}/launch?${params.toString()}`);
-    return response;
+    return await window.api.profiles.launch(profileId, options);
   },
 
   /**
@@ -349,16 +370,14 @@ export const profilesApi = {
     profileId: string,
     config: Record<string, any>
   ): Promise<Record<string, any>> => {
-    const response = await api.post(`/api/profiles/${profileId}/browser-config`, config);
-    return response;
+    return await window.api.profiles.setBrowserConfig(profileId, config);
   },
 
   /**
    * Close a browser instance for the specified profile
    */
   closeBrowser: async (profileId: string): Promise<Record<string, any>> => {
-    const response = await api.post(`/api/profiles/${profileId}/close`);
-    return response;
+    return await window.api.profiles.close(profileId);
   },
 
   /**
@@ -368,8 +387,7 @@ export const profilesApi = {
     profileId: string,
     proxyId?: string
   ): Promise<Record<string, any>> => {
-    const response = await api.post(`/api/profiles/${profileId}/assign-proxy`, { proxyId });
-    return response;
+    return await window.api.profiles.assignProxy(profileId, proxyId || '');
   },
 
   /**
@@ -394,18 +412,20 @@ export const profilesApi = {
 
   /**
    * Import a profile from a JSON file
+   * @param file - The JSON file to import
    */
-  import: async (file: File): Promise<Profile> => {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    // Assuming the server can parse options from a separate field or query param if needed
-    // For now, we'll just send the file.
-    const response = await api.post('/api/profiles/import/json', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+  importProfile: async (file: File): Promise<any> => {
+    try {
+      // Create a FormData object with the file
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // For now, we'll use IPC to import the profile
+    const response = await window.api.profiles.importFromJson(formData);
     return response;
-  }
+    } catch (error) {
+      console.error('Profile import failed:', error);
+      throw error;
+    }
+  },
 };

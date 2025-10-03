@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { NeonText } from '@/admin/settings/components/ui/neon-text';
 import { GradientBorder } from '@/admin/settings/components/ui/gradient-border';
-import { styles } from '@/admin/settings/styles';
+import { styles } from '@/admin/settings/components/styles';
 
 interface SettingsHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;

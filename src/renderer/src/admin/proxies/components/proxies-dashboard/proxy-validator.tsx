@@ -193,6 +193,11 @@ export function ProxyValidator({
           const password = parts[3] || undefined
 
           try {
+            // Check if proxy validation API is available before proceeding
+            if (typeof window === 'undefined' || !window.api || !window.api.proxies || !window.api.proxies.validate) {
+              throw new Error('Proxy validation service is not available. Please ensure the application is properly initialized.');
+            }
+
             const result = await validateProxy(host, port, 'http', username, password)
             
             results.push({

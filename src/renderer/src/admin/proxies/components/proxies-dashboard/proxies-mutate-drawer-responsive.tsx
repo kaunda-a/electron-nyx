@@ -156,6 +156,16 @@ export function ProxiesMutateDrawerResponsive({ open, onOpenChange, currentRow }
   const onSubmit = async (values: ProxyForm) => {
     setIsSubmitting(true)
     try {
+      // Check if proxy validation API is available before proceeding
+      if (typeof window === 'undefined' || !window.api || !window.api.proxies || !window.api.proxies.validate) {
+        toast({
+          title: "Validation Service Unavailable",
+          description: "Proxy validation service is not available. Please ensure the application is properly initialized.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Auto-validate the proxy before saving
       setValidationResult(null);
 
@@ -274,30 +284,87 @@ export function ProxiesMutateDrawerResponsive({ open, onOpenChange, currentRow }
         ? '/api/proxies/import/csv' 
         : '/api/proxies/import/txt'
       
-      // Use the existing api instance but override content type for file upload
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${endpoint}`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          // Don't set Content-Type - let browser set it with boundary for multipart/form-data
-          // Authorization header will be added by the interceptor
+      // Use IPC instead of direct HTTP call
+      const formDataObj = {
+        file: file,
+        name: file.name,
+        type: file.type,
+        size: file.size
+      };
+      
+      // For CSV files, we need to parse and convert to proxy objects
+      if (file.name.endsWith('.csv')) {
+        // Parse CSV file and create proxies
+        const text = await file.text();
+        const lines = text.split('\n').filter(line => line.trim());
+        const proxies = [];
+        
+        // Skip header row if present
+        const startIndex = lines[0].includes('host,port,username,password') ? 1 : 0;
+        
+        for (let i = startIndex; i < lines.length; i++) {
+          const [host, port, username, password] = lines[i].split(',');
+          if (host && port) {
+            proxies.push({
+              host: host.trim(),
+              port: parseInt(port.trim()),
+              username: username ? username.trim() : undefined,
+              password: password ? password.trim() : undefined,
+              protocol: 'http' // Default protocol
+            });
+          }
         }
-      })
-      
-      const result = await response.json()
-      
-      if (result.success) {
+        
+        // Use batch create IPC method
+        const result = await window.api.proxies.batchCreate(proxies);
+        
         setImportResult({
-          success: result.data.imported?.length || 0,
-          errors: result.data.errors?.length || 0
-        })
+          success: result.imported || proxies.length,
+          errors: result.errors || 0
+        });
         
         toast({
           title: "Import Successful",
-          description: `Successfully imported ${result.data.imported?.length || 0} proxies.`,
-        })
+          description: `Successfully imported ${result.imported || proxies.length} proxies.`,
+        });
         
-        fetchProxies()
+        fetchProxies();
+        return;
+      } else {
+        // For TXT files, read line by line
+        const text = await file.text();
+        const lines = text.split('\n').filter(line => line.trim());
+        const proxies = [];
+        
+        for (const line of lines) {
+          const [host, port, username, password] = line.split(':');
+          if (host && port) {
+            proxies.push({
+              host: host.trim(),
+              port: parseInt(port.trim()),
+              username: username ? username.trim() : undefined,
+              password: password ? password.trim() : undefined,
+              protocol: 'http' // Default protocol
+            });
+          }
+        }
+        
+        // Use batch create IPC method
+        const result = await window.api.proxies.batchCreate(proxies);
+        
+        setImportResult({
+          success: result.imported || proxies.length,
+          errors: result.errors || 0
+        });
+        
+        toast({
+          title: "Import Successful",
+          description: `Successfully imported ${result.imported || proxies.length} proxies.`,
+        });
+        
+        fetchProxies();
+        return;
+      }
         onOpenChange(false)
       } else {
         throw new Error(result.error || "Failed to import proxies")
@@ -658,6 +725,16 @@ export function ProxiesMutateDrawerResponsive({ open, onOpenChange, currentRow }
                             size="sm"
                             disabled={!form.watch('host') || !form.watch('port') || isValidating}
                             onClick={async () => {
+                              // Check if proxy validation API is available before proceeding
+                              if (typeof window === 'undefined' || !window.api || !window.api.proxies || !window.api.proxies.validate) {
+                                toast({
+                                  title: "Validation Service Unavailable",
+                                  description: "Proxy validation service is not available. Please ensure the application is properly initialized.",
+                                  variant: "destructive",
+                                });
+                                return;
+                              }
+
                               setIsValidating(true);
                               setValidationResult(null);
                               try {

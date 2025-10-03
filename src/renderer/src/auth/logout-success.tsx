@@ -161,7 +161,7 @@ export default function LogoutSuccess() {
             transition={{ delay: 0.7 }}
             className="text-sm text-muted-foreground"
           >
-            You'll be automatically redirected to the sign-in page in 5 seconds
+            You'll be automatically redirected to sign in in 5 seconds
           </motion.p>
         </div>
 

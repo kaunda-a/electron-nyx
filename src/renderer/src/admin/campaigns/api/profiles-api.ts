@@ -1,5 +1,3 @@
-import { api } from '@/lib/api';
-
 // Types
 export interface Screen {
   width: number;
@@ -175,21 +173,21 @@ export const profilesApi = {
    * Create a new browser profile
    */
   create: async (profileData: ProfileCreate): Promise<Profile> => {
-    return api.post('/api/profiles', profileData);
+    return await window.api.profiles.create(profileData);
   },
 
   /**
    * Get a list of profiles
    */
   list: async (): Promise<Profile[]> => {
-    return api.get('/api/profiles');
+    return await window.api.profiles.getAll();
   },
 
   /**
    * Get a specific profile by ID
    */
   get: async (profileId: string): Promise<Profile> => {
-    return api.get(`/api/profiles/${profileId}`);
+    return await window.api.profiles.getById(profileId);
   },
 
   /**
@@ -199,35 +197,35 @@ export const profilesApi = {
     profileId: string,
     updateData: ProfileUpdate
   ): Promise<Profile> => {
-    return api.put(`/api/profiles/${profileId}`, updateData);
+    return await window.api.profiles.update(profileId, updateData);
   },
 
   /**
    * Delete a profile
    */
   delete: async (profileId: string): Promise<void> => {
-    return api.delete(`/api/profiles/${profileId}`);
+    return await window.api.profiles.delete(profileId);
   },
 
   /**
    * Search for profiles by name or other properties
    */
   search: async (query: string): Promise<Profile[]> => {
-    return api.get(`/api/profiles/search?query=${encodeURIComponent(query)}`);
+    return await window.api.profiles.search(query);
   },
 
   /**
    * Get detailed statistics for a profile
    */
   getStats: async (profileId: string): Promise<ProfileStats> => {
-    return api.get(`/api/profiles/${profileId}/stats`);
+    return await window.api.profiles.getStats(profileId);
   },
 
   /**
    * Get the actual fingerprint for a profile with all properties
    */
   getFingerprint: async (profileId: string): Promise<FingerprintData> => {
-    return api.get(`/api/profiles/${profileId}/fingerprint`);
+    return await window.api.profiles.getFingerprint(profileId);
   },
 
 
@@ -235,7 +233,7 @@ export const profilesApi = {
    * Create multiple unique profiles at once
    */
   createBatch: async (batchConfig: BatchProfileCreate): Promise<BatchProfileResponse> => {
-    return api.post('/api/profiles/batch', batchConfig);
+    return await window.api.profiles.batchCreate(batchConfig);
   },
 
   /**
@@ -257,17 +255,7 @@ export const profilesApi = {
       humanize?: boolean;
     } = {}
   ): Promise<Record<string, any>> => {
-    const params = new URLSearchParams();
-
-    // Set default values if not provided
-    params.set('headless', String(options.headless ?? false));
-    params.set('use_proxy', String(options.useProxy ?? true));
-
-    // Add optional parameters if provided
-    if (options.geoip !== undefined) params.set('geoip', String(options.geoip));
-    if (options.humanize !== undefined) params.set('humanize', String(options.humanize));
-
-    return api.post(`/api/profiles/${profileId}/launch?${params.toString()}`);
+    return await window.api.profiles.launch(profileId, options);
   },
 
   /**
@@ -283,14 +271,14 @@ export const profilesApi = {
     profileId: string,
     config: Record<string, any>
   ): Promise<Record<string, any>> => {
-    return api.post(`/api/profiles/${profileId}/browser-config`, config);
+    return await window.api.profiles.setBrowserConfig(profileId, config);
   },
 
   /**
    * Close a browser instance for the specified profile
    */
   closeBrowser: async (profileId: string): Promise<Record<string, any>> => {
-    return api.post(`/api/profiles/${profileId}/close`);
+    return await window.api.profiles.close(profileId);
   },
 
   /**

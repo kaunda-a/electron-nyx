@@ -7,8 +7,23 @@ import { AppSidebar } from '@/components/layout/app-sidebar'
 import SkipToMain from '@/components/skip-to-main'
 import { supabase } from '@/lib/supabase'
 import Cookies from 'js-cookie'
+import { useAuthStore } from '@/lib/auth/store'
 
 export const Route = createFileRoute('/_authenticated')({
+  beforeLoad: async () => {
+    // Check if user is authenticated by getting current session
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (!session?.user) {
+      // If no user is authenticated, redirect to sign in
+      throw redirect({
+        to: '/sign-in',
+        search: { 
+          redirect: window.location.pathname + window.location.search 
+        }
+      })
+    }
+  },
   component: RouteComponent,
   
 })

@@ -23,7 +23,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { useAuthStore } from '@/auth/api/stores/authStore'
+import { useAuthStore } from '@/lib/auth/store'
 
 export function NavUser({
   user,
@@ -70,7 +70,7 @@ export function NavUser({
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className='w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg'
+            className='w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg backdrop-blur-sm bg-popover/90'
             side={isMobile ? 'bottom' : 'right'}
             align='end'
             sideOffset={4}

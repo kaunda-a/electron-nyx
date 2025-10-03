@@ -12,7 +12,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: false, // Disable for desktop apps to prevent conflicts with custom protocol
+    flowType: 'pkce',  // Enable PKCE flow for secure OAuth in desktop apps
+    storage: globalThis.localStorage, // Use localStorage for session persistence in desktop app
+    storageKey: 'sb-nyx-auth-token' // Custom storage key for desktop app
   }
 })
 

@@ -1,4 +1,4 @@
-import { api } from '@/lib/api'
+
 
 export interface ProxyValidationResult {
   isValid: boolean;
@@ -21,19 +21,26 @@ export async function validateProxy(
   password?: string
 ): Promise<ProxyValidationResult> {
   try {
-    const response = await api.post<{ success: boolean; message: string }>('/api/proxies/validate', {
-      host,
-      port,
-      protocol,
-      username,
-      password,
-    });
-    
-    // Return a properly structured result based on the backend response
-    return {
-      isValid: response.success,
-      error: response.success ? undefined : response.message,
-    };
+    // Safety check before calling validate
+    if (typeof window !== 'undefined' && window.api && window.api.proxies) {
+      const response = await window.api.proxies.validate({
+        host,
+        port,
+        protocol,
+        username,
+        password,
+      });
+      
+      // Return a properly structured result based on the backend response
+      return {
+        isValid: response.success,
+        error: response.success ? undefined : response.message,
+      };
+    } else {
+      console.warn('window.api.proxies.validate is not available');
+      // Throw an error so the calling function can handle it appropriately
+      throw new Error('IPC API not available - proxy validation cannot be performed');
+    }
   } catch (error) {
     // Handle API errors
     if (error instanceof Error) {

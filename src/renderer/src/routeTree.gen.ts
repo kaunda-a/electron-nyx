@@ -16,6 +16,7 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authOtpRouteImport } from './routes/(auth)/otp'
 import { Route as auth500RouteImport } from './routes/(auth)/500'
+import { Route as authCallbackRouteImport } from './routes/(auth)/callback'
 
 const errors598LazyRouteImport = createFileRoute('/(errors)/598')()
 const errors503LazyRouteImport = createFileRoute('/(errors)/503')()
@@ -31,6 +32,7 @@ const authLogoutSuccessLazyRouteImport = createFileRoute(
 const authForgotPasswordLazyRouteImport = createFileRoute(
   '/(auth)/forgot-password',
 )()
+const authCallbackRouteImport = createFileRoute('/(auth)/callback')()
 const AuthenticatedSettingsRouteLazyRouteImport = createFileRoute(
   '/_authenticated/settings',
 )()
@@ -136,9 +138,14 @@ const authLogoutSuccessLazyRoute = authLogoutSuccessLazyRouteImport
     path: '/logout-success',
     getParentRoute: () => rootRouteImport,
   } as any)
-  .lazy(() =>
-    import('./routes/(auth)/logout-success.lazy').then((d) => d.Route),
-  )
+  .lazy(() => import('./routes/(auth)/logout-success.lazy').then((d) => d.Route))
+const authCallbackLazyRoute = authCallbackRouteImport
+  .update({
+    id: '/(auth)/callback',
+    path: '/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() => import('./routes/(auth)/callback.lazy').then((d) => d.Route))
 const authForgotPasswordLazyRoute = authForgotPasswordLazyRouteImport
   .update({
     id: '/(auth)/forgot-password',
@@ -269,6 +276,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   '/forgot-password': typeof authForgotPasswordLazyRoute
   '/logout-success': typeof authLogoutSuccessLazyRoute
+  '/callback': typeof authCallbackLazyRoute
   '/sign-in-2': typeof authSignIn2LazyRoute
   '/sign-up': typeof authSignUpLazyRoute
   '/401': typeof errors401LazyRoute
@@ -293,6 +301,7 @@ export interface FileRoutesByTo {
   '/500': typeof auth500Route
   '/otp': typeof authOtpRoute
   '/sign-in': typeof authSignInRoute
+  '/callback': typeof authCallbackLazyRoute
   '/forgot-password': typeof authForgotPasswordLazyRoute
   '/logout-success': typeof authLogoutSuccessLazyRoute
   '/sign-in-2': typeof authSignIn2LazyRoute
@@ -322,6 +331,7 @@ export interface FileRoutesById {
   '/(auth)/otp': typeof authOtpRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteLazyRouteWithChildren
+  '/(auth)/callback': typeof authCallbackLazyRoute
   '/(auth)/forgot-password': typeof authForgotPasswordLazyRoute
   '/(auth)/logout-success': typeof authLogoutSuccessLazyRoute
   '/(auth)/sign-in-2': typeof authSignIn2LazyRoute
@@ -350,6 +360,7 @@ export interface FileRouteTypes {
     | '/500'
     | '/otp'
     | '/sign-in'
+    | '/callback'
     | '/settings'
     | '/forgot-password'
     | '/logout-success'
@@ -377,6 +388,7 @@ export interface FileRouteTypes {
     | '/500'
     | '/otp'
     | '/sign-in'
+    | '/callback'
     | '/forgot-password'
     | '/logout-success'
     | '/sign-in-2'
@@ -404,6 +416,7 @@ export interface FileRouteTypes {
     | '/(auth)/500'
     | '/(auth)/otp'
     | '/(auth)/sign-in'
+    | '/(auth)/callback'
     | '/_authenticated/settings'
     | '/(auth)/forgot-password'
     | '/(auth)/logout-success'

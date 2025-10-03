@@ -1,5 +1,3 @@
-import { api } from '@/lib/api';
-
 // Types
 export interface ProxyCreate {
   host: string;
@@ -40,7 +38,13 @@ export const proxiesApi = {
    * Get a list of all proxies
    */
   list: async (): Promise<ProxyResponse[]> => {
-    return api.get('/api/proxies');
+    // Check if window.api.proxies exists before calling getAll
+    if (typeof window !== 'undefined' && window.api && window.api.proxies) {
+      return await window.api.proxies.getAll();
+    } else {
+      console.warn('window.api.proxies is not available');
+      return [];
+    }
   },
 
   /**
@@ -49,7 +53,12 @@ export const proxiesApi = {
    * @param proxyData - The proxy data to create
    */
   create: async (proxyData: ProxyCreate): Promise<ProxyResponse> => {
-    return api.post('/api/proxies', proxyData);
+    // Check if window.api.proxies exists before calling create
+    if (typeof window !== 'undefined' && window.api && window.api.proxies) {
+      return await window.api.proxies.create(proxyData);
+    } else {
+      throw new Error('window.api.proxies is not available');
+    }
   },
 
   /**
@@ -58,7 +67,12 @@ export const proxiesApi = {
    * @param proxyId - The ID of the proxy to get
    */
   get: async (proxyId: string): Promise<ProxyResponse> => {
-    return api.get(`/api/proxies/${proxyId}`);
+    // Check if window.api.proxies exists before calling getById
+    if (typeof window !== 'undefined' && window.api && window.api.proxies) {
+      return await window.api.proxies.getById(proxyId);
+    } else {
+      throw new Error('window.api.proxies is not available');
+    }
   },
 
   /**
@@ -67,7 +81,12 @@ export const proxiesApi = {
    * @param proxyId - The ID of the proxy to check
    */
   checkHealth: async (proxyId: string): Promise<Record<string, any>> => {
-    return api.post(`/api/proxies/${proxyId}/check`);
+    // Check if window.api.proxies exists before calling check
+    if (typeof window !== 'undefined' && window.api && window.api.proxies) {
+      return await window.api.proxies.check(proxyId);
+    } else {
+      throw new Error('window.api.proxies is not available');
+    }
   },
 
   /**
@@ -82,17 +101,12 @@ export const proxiesApi = {
     proxyId?: string,
     country?: string
   ): Promise<ProxyAssignmentResponse> => {
-    let url = `/api/proxies/assign?profile_id=${profileId}`;
-    
-    if (proxyId) {
-      url += `&proxy_id=${proxyId}`;
+    // Check if window.api.proxies exists before calling assign
+    if (typeof window !== 'undefined' && window.api && window.api.proxies) {
+      return await window.api.proxies.assign(profileId);
+    } else {
+      throw new Error('window.api.proxies is not available');
     }
-    
-    if (country) {
-      url += `&country=${country}`;
-    }
-    
-    return api.post(url);
   },
 
   /**
@@ -101,6 +115,11 @@ export const proxiesApi = {
    * @param proxyId - The ID of the proxy to delete
    */
   delete: async (proxyId: string): Promise<{ success: boolean }> => {
-    return api.delete(`/api/proxies/${proxyId}`);
+    // Check if window.api.proxies exists before calling delete
+    if (typeof window !== 'undefined' && window.api && window.api.proxies) {
+      return await window.api.proxies.delete(proxyId);
+    } else {
+      throw new Error('window.api.proxies is not available');
+    }
   }
 };

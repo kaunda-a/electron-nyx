@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
@@ -90,13 +90,21 @@ interface ProxyBulkInputProps {
   isLoading?: boolean;
 }
 
-export function ProxyBulkInput({ onParse, onAddStart, onCancel, isLoading }: ProxyBulkInputProps) {
-  const [input, setInput] = useState('')
-  const [parsedProxies, setParsedProxies] = useState<ParsedProxy[]>([])
-  const [error, setError] = useState<string | null>(null)
-  const [isParsing, setIsParsing] = useState(false)
-  const [isValidating, setIsValidating] = useState(false)
-  const [validationResults, setValidationResults] = useState<Record<string, { isValid: boolean; error?: string }>>({})
+export function ProxyBulkInput({ onAddStart, onCancel, isLoading }: ProxyBulkInputProps) {
+  const [inputText, setInputText] = useState('');
+  const [parsedProxies, setParsedProxies] = useState<ParsedProxy[]>([]);
+  const [isValidating, setIsValidating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [validationResults, setValidationResults] = useState<Record<string, { isValid: boolean; error?: string }>>({});
+  const { toast } = useToast();
+  
+  // Flag to prevent repeated error notifications
+  const [apiErrorShown, setApiErrorShown] = useState(false);
+
+  // Reset API error flag when input changes
+  React.useEffect(() => {
+    setApiErrorShown(false);
+  }, [inputText]);
 
   const parseProxies = () => {
     setError(null)
@@ -199,6 +207,32 @@ export function ProxyBulkInput({ onParse, onAddStart, onCancel, isLoading }: Pro
   }
 
   const validateProxies = async () => {
+    // Check if proxy validation API is available before proceeding
+    if (typeof window === 'undefined' || !window.api || !window.api.proxies) {
+      // Only show error once to prevent spam
+      if (!apiErrorShown) {
+        setError('Proxy validation service is not available. Please ensure the application is properly initialized.');
+        console.log('Proxy validation service not available:', {
+          windowExists: typeof window !== 'undefined',
+          apiExists: typeof window !== 'undefined' && !!window.api,
+          proxiesExists: typeof window !== 'undefined' && !!window.api && !!window.api.proxies,
+          validateExists: typeof window !== 'undefined' && !!window.api && !!window.api.proxies && !!window.api.proxies.validate
+        });
+        setApiErrorShown(true);
+      }
+      return;
+    }
+
+    if (!window.api.proxies.validate) {
+      // Only show error once to prevent spam
+      if (!apiErrorShown) {
+        setError('Proxy validation service is not available. Please ensure the application is properly initialized.');
+        console.log('Proxy validation service validate method not available:', window.api.proxies);
+        setApiErrorShown(true);
+      }
+      return;
+    }
+
     setIsValidating(true)
     setError(null)
     setValidationResults({})
